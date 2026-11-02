@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开票管理 · 大黄鹅 OS 管理系统</title>
+<style>
+  :root{
+    --primary:#2b7cff;
+    --primary-hover:#1f6ef2;
+    --primary-light:#eaf2ff;
+    --text:#1f2329;
+    --text-2:#4e5969;
+    --text-3:#86909c;
+    --border:#e5e6eb;
+    --border-2:#f2f3f5;
+    --bg:#f5f6f8;
+    --danger:#f53f3f;
+    --success:#00b578;
+    --warn:#ff7d00;
+    --radius:6px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);font-size:14px;
+  }
+
+  .topnav{
+    height:56px;background:#fff;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:30;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;margin-right:36px;}
+  .logo .mark{width:30px;height:30px;border-radius:50%;background:#f0b100;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .nav-item{padding:0 16px;line-height:56px;color:var(--text-2);cursor:pointer;font-size:14px;position:relative;white-space:nowrap;}
+  .nav-item:hover{color:var(--primary);}
+  .nav-item.active{color:var(--primary);font-weight:600;}
+  .nav-item.active::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:var(--primary);}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:16px;color:var(--text-2);font-size:13px;white-space:nowrap;}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+  .layout{display:flex;align-items:flex-start;min-height:calc(100vh - 56px);}
+  .sidebar{
+    width:170px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);
+    position:sticky;top:56px;height:calc(100vh - 56px);overflow:auto;padding:8px 0;
+  }
+  .side-item{padding:8px 12px 8px 20px;border-radius:4px;color:var(--text-3);cursor:pointer;font-size:13px;margin-bottom:1px;}
+  .side-item:hover{background:var(--border-2);}
+  .side-item.main{
+    display:flex;align-items:center;gap:6px;color:var(--text);font-weight:600;
+    font-size:14px;padding:12px 12px 8px 16px;cursor:default;
+  }
+  .side-item.main .ic{color:var(--primary);font-style:normal;}
+  .side-item.sub{padding-left:34px;}
+  .side-item.sub.active{background:var(--primary-light);color:var(--primary);font-weight:500;}
+
+  .content{flex:1;min-width:0;padding:16px 24px 24px;display:flex;flex-direction:column;}
+  .breadcrumb{font-size:13px;color:var(--text-3);margin-bottom:14px;}
+  .breadcrumb b{color:var(--text);font-weight:500;}
+
+  .card{background:#fff;border-radius:var(--radius);box-shadow:0 1px 2px rgba(0,0,0,.03);padding:20px 24px 8px;}
+
+  .filter-bar{
+    display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-bottom:16px;
+    border-bottom:1px solid var(--border-2);
+  }
+  .fb-item{display:flex;align-items:center;gap:8px;}
+  .fb-item .fl{font-size:13px;color:var(--text-2);white-space:nowrap;}
+  input.sel,select.sel{
+    height:30px;border:1px solid var(--border);border-radius:4px;padding:0 8px;
+    font-size:13px;color:var(--text);background:#fff;outline:none;font-family:inherit;min-width:130px;
+  }
+  input.sel:focus,select.sel:focus{border-color:var(--primary);}
+  input.sel::placeholder{color:#c9cdd4;}
+  .range{display:flex;align-items:center;gap:6px;}
+  .range span{color:var(--text-3);font-size:12px;}
+  .btn{
+    height:30px;padding:0 16px;border-radius:4px;border:1px solid var(--border);
+    background:#fff;color:var(--text-2);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;
+  }
+  .btn:hover{border-color:var(--primary);color:var(--primary);}
+  .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-hover);color:#fff;}
+  .btn-right{margin-left:auto;}
+
+  .table-wrap{margin:0 -24px;overflow-x:auto;}
+  table.gt{width:100%;border-collapse:collapse;font-size:13px;min-width:1180px;}
+  table.gt th{
+    background:#f7f8fa;color:var(--text-2);font-weight:500;text-align:left;
+    padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  table.gt td{padding:11px 14px;border-bottom:1px solid var(--border-2);color:var(--text-2);white-space:nowrap;}
+  table.gt tbody tr:hover{background:#fafbfc;}
+  table.gt tr:last-child td{border-bottom:none;}
+  table.gt td.num,table.gt th.num{text-align:right;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--text);}
+  .strong{color:var(--text);font-weight:500;}
+  .empty{padding:56px 0;text-align:center;color:var(--text-3);font-size:13px;}
+
+  .src{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:11px;font-size:12px;}
+  .src.offline{background:#fff3e0;color:#c46200;}
+  .src.online{background:var(--primary-light);color:var(--primary);}
+  .st{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:11px;font-size:12px;}
+  .st::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
+  .st.s-done{background:#e8f7ef;color:#00875a;}
+  .st.s-wait{background:#fff7e8;color:#b0781a;}
+  .st.s-ing{background:var(--primary-light);color:var(--primary);}
+  .st.s-void{background:#f2f3f5;color:#8a919f;}
+
+  .op{display:flex;gap:12px;align-items:center;}
+  .link{color:var(--primary);cursor:pointer;font-size:13px;}
+  .link:hover{text-decoration:underline;}
+  .link.danger{color:var(--danger);}
+  .link.disabled{color:#c9cdd4;cursor:not-allowed;text-decoration:none;}
+
+  .pager{
+    display:flex;align-items:center;gap:8px;padding:14px 0 16px;font-size:13px;color:var(--text-2);
+  }
+  .pager .total{margin-right:auto;color:var(--text-3);}
+  .pg{
+    min-width:30px;height:30px;padding:0 8px;border:1px solid var(--border);border-radius:4px;
+    background:#fff;color:var(--text-2);cursor:pointer;font-size:13px;font-family:inherit;
+  }
+  .pg:hover{border-color:var(--primary);color:var(--primary);}
+  .pg.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .pg:disabled{background:#f7f8fa;color:#c9cdd4;cursor:not-allowed;border-color:var(--border);}
+
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;}
+  .mask.show{display:flex;}
+  .modal{background:#fff;border-radius:8px;width:440px;padding:24px 28px;}
+  .modal h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .modal h3 .warn-ic{width:22px;height:22px;border-radius:50%;background:#fff1f0;color:var(--danger);font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .modal p{font-size:13px;color:var(--text-3);line-height:1.9;}
+  .modal-foot{display:flex;justify-content:flex-end;gap:12px;margin-top:18px;}
+
+  .toast{
+    position:fixed;left:50%;top:24px;transform:translateX(-50%) translateY(-8px);
+    background:rgba(31,35,41,.92);color:#fff;font-size:13px;padding:9px 18px;border-radius:4px;
+    opacity:0;pointer-events:none;transition:all .2s;z-index:200;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="logo"><span class="mark">鹅</span>大黄鹅</div>
+  <div class="nav-item active">售货机运营</div>
+  <div class="nav-item">供应商中心</div>
+  <div class="nav-item">营销中心</div>
+  <div class="nav-item">服务商管理</div>
+  <div class="nav-item">AI管理系统</div>
+  <div class="nav-item">生产管理</div>
+  <div class="nav-item">云值守</div>
+  <div class="nav-item">更多 ▾</div>
+  <div class="nav-right">
+    <span>🌐 中文 ▾</span>
+    <span class="avatar">王</span><span>王泳瑜 ▾</span>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-item">财务审核</div>
+    <div class="side-item">退款支付</div>
+    <div class="side-item">客服工单</div>
+    <div class="side-item">统计分析</div>
+    <div class="side-item main"><span class="ic">Ⓢ</span>结算中心</div>
+    <div class="side-item sub">账户管理</div>
+    <div class="side-item sub">充值管理</div>
+    <div class="side-item sub">退货记录</div>
+    <div class="side-item sub">收益结算</div>
+    <div class="side-item sub active">开票管理</div>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb">结算中心 / <b>开票管理</b></div>
+
+    <div class="card">
+      <!-- 筛选 -->
+      <div class="filter-bar">
+        <div class="fb-item">
+          <span class="fl">开票单号</span>
+          <input class="sel" id="fNo" placeholder="请输入开票单号" style="min-width:180px;">
+        </div>
+        <div class="fb-item">
+          <span class="fl">商户</span>
+          <input class="sel" id="fMch" placeholder="输入商户名称" style="min-width:180px;">
+        </div>
+        <div class="fb-item">
+          <span class="fl">开票来源</span>
+          <select class="sel" id="fSrc">
+            <option value="">全部</option>
+            <option value="线上申请">线上申请</option>
+            <option value="线下补录">线下补录</option>
+          </select>
+        </div>
+        <div class="fb-item">
+          <span class="fl">单据状态</span>
+          <select class="sel" id="fStatus">
+            <option value="">全部</option>
+            <option value="待开票">待开票</option>
+            <option value="待审核">待审核</option>
+            <option value="审核中">审核中</option>
+            <option value="已开票">已开票</option>
+            <option value="已作废">已作废</option>
+          </select>
+        </div>
+        <div class="fb-item">
+          <span class="fl">开票日期</span>
+          <div class="range">
+            <input class="sel" type="date" id="fFrom">
+            <span>至</span>
+            <input class="sel" type="date" id="fTo">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="doSearch(this)">搜索</button>
+        <button class="btn" onclick="resetFilter()">重置</button>
+        <button class="btn btn-primary btn-right" onclick="window.open(OFFLINE_URL,'_blank')">线下开票补录</button>
+      </div>
+
+      <!-- 列表 -->
+      <div class="table-wrap">
+        <table class="gt">
+          <thead>
+            <tr>
+              <th style="width:160px;">开票单号</th>
+              <th style="min-width:220px;">商户</th>
+              <th style="width:110px;">开票类型</th>
+              <th style="width:110px;">开票来源</th>
+              <th class="num" style="width:120px;">开票金额</th>
+              <th style="width:100px;">单据状态</th>
+              <th style="width:110px;">开票日期</th>
+              <th style="width:90px;">提交人</th>
+              <th style="width:150px;">提交时间</th>
+              <th style="width:130px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty" id="emptyTip" style="display:none;">没有符合条件的开票单</div>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pager" id="pager"></div>
+    </div>
+  </main>
+</div>
+
+<div class="mask" id="voidMask">
+  <div class="modal">
+    <h3><span class="warn-ic">!</span>作废该开票单？</h3>
+    <p id="voidDesc">作废后本单不再计为有效开票，关联订单开票状态将回写为「已作废」。</p>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeVoid()">取消</button>
+      <button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger);" onclick="doVoid()">确认作废</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* 演示数据：混合线上申请 / 线下补录 */
+  var ROWS = [
+    {no:'KP202611020001', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线下补录', amt:74896,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 16:20:33', orders:6},
+    {no:'KP202611020002', mch:'韦小宝',                     type:'快销品采购', src:'线下补录', amt:26218,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 15:02:11', orders:1},
+    {no:'KP202610310018', mch:'深圳市乐科智控科技有限公司', type:'售货机运营', src:'线上申请', amt:128400, status:'待审核', date:'2026-10-31', by:'李海涛', at:'2026-10-31 10:12:40', orders:0},
+    {no:'KP202610300012', mch:'广州云小铺商贸有限公司',     type:'快销品采购', src:'线上申请', amt:52300,  status:'审核中', date:'2026-10-30', by:'陈嘉怡', at:'2026-10-30 09:45:02', orders:0},
+    {no:'KP202610290006', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线下补录', amt:150000, status:'已作废', date:'2026-10-29', by:'王泳瑜', at:'2026-10-29 17:31:18', orders:3},
+    {no:'KP202610280021', mch:'东莞智联零售有限公司',       type:'售货机运营', src:'线上申请', amt:86000,  status:'已开票', date:'2026-10-28', by:'李海涛', at:'2026-10-28 11:08:55', orders:0},
+    {no:'KP202610270009', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线上申请', amt:210000, status:'待开票', date:'2026-10-27', by:'陈嘉怡', at:'2026-10-27 14:22:36', orders:0},
+    {no:'KP202610260014', mch:'韦小宝',                     type:'快销品采购', src:'线上申请', amt:9600,   status:'已开票', date:'2026-10-26', by:'李海涛', at:'2026-10-26 16:40:12', orders:0},
+    {no:'KP202610250003', mch:'广州云小铺商贸有限公司',     type:'快销品采购', src:'线下补录', amt:68800,  status:'已开票', date:'2026-10-25', by:'王泳瑜', at:'2026-10-25 10:05:47', orders:2},
+    {no:'KP202610240017', mch:'东莞智联零售有限公司',       type:'售货机运营', src:'线上申请', amt:132000, status:'待审核', date:'2026-10-24', by:'陈嘉怡', at:'2026-10-24 15:58:30', orders:0},
+    {no:'KP202610230008', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线上申请', amt:45000,  status:'已开票', date:'2026-10-23', by:'李海涛', at:'2026-10-23 09:21:09', orders:0}
+  ];
+  var DETAIL_URL = 'https://wyy1746919440.github.io/os-invoice-offline-detail/';
+  var OFFLINE_URL = 'https://wyy1746919440.github.io/os-invoice-offline/';
+
+  var view = [];
+  var page = 1, SIZE = 6;
+  var voidTarget = null;
+  var t = null;
+
+  function fmt(f){ return '¥' + (f/100).toFixed(2); }
+  function stClass(s){
+    if(s === '已开票') return 's-done';
+    if(s === '待开票' || s === '待审核') return 's-wait';
+    if(s === '审核中') return 's-ing';
+    return 's-void';
+  }
+
+  function applyFilter(){
+    var no = document.getElementById('fNo').value.trim().toLowerCase();
+    var mch = document.getElementById('fMch').value.trim();
+    var src = document.getElementById('fSrc').value;
+    var st = document.getElementById('fStatus').value;
+    var from = document.getElementById('fFrom').value;
+    var to = document.getElementById('fTo').value;
+
+    view = ROWS.filter(function(r){
+      if(no && r.no.toLowerCase().indexOf(no) < 0) return false;
+      if(mch && r.mch.indexOf(mch) < 0) return false;
+      if(src && r.src !== src) return false;
+      if(st && r.status !== st) return false;
+      if(from && r.date < from) return false;
+      if(to && r.date > to) return false;
+      return true;
+    });
+    page = 1;
+    render();
+  }
+
+  function resetFilter(){
+    ['fNo','fMch','fFrom','fTo'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('fSrc').value = '';
+    document.getElementById('fStatus').value = '';
+    applyFilter();
+  }
+
+  function render(){
+    var tb = document.getElementById('tbody');
+    var start = (page - 1) * SIZE;
+    var list = view.slice(start, start + SIZE);
+
+    tb.innerHTML = list.map(function(r){
+      var canVoid = r.src === '线下补录' && r.status !== '已作废';
+      return '<tr>'+
+        '<td><span class="mono">'+r.no+'</span></td>'+
+        '<td class="strong">'+r.mch+'</td>'+
+        '<td>'+r.type+'</td>'+
+        '<td><span class="src '+(r.src==='线下补录'?'offline':'online')+'">'+r.src+'</span></td>'+
+        '<td class="num strong">'+fmt(r.amt)+'</td>'+
+        '<td><span class="st '+stClass(r.status)+'">'+r.status+'</span></td>'+
+        '<td>'+r.date+'</td>'+
+        '<td>'+r.by+'</td>'+
+        '<td style="color:var(--text-3);">'+r.at+'</td>'+
+        '<td><div class="op">'+
+          '<span class="link" onclick="openDetail(\''+r.no+'\')">详情</span>'+
+          (canVoid
+            ? '<span class="link danger" onclick="askVoid(\''+r.no+'\')">作废</span>'
+            : '<span class="link disabled">作废</span>')+
+        '</div></td>'+
+      '</tr>';
+    }).join('');
+
+    document.getElementById('emptyTip').style.display = view.length ? 'none' : 'block';
+
+    /* 分页 */
+    var pages = Math.max(1, Math.ceil(view.length / SIZE));
+    var html = '<span class="total">共 '+view.length+' 条</span>';
+    html += '<button class="pg" onclick="go('+(page-1)+')" '+(page===1?'disabled':'')+'>上一页</button>';
+    for(var i = 1; i <= pages; i++){
+      html += '<button class="pg '+(i===page?'on':'')+'" onclick="go('+i+')">'+i+'</button>';
+    }
+    html += '<button class="pg" onclick="go('+(page+1)+')" '+(page===pages?'disabled':'')+'>下一页</button>';
+    document.getElementById('pager').innerHTML = html;
+  }
+
+  function go(p){
+    var pages = Math.max(1, Math.ceil(view.length / SIZE));
+    if(p < 1 || p > pages) return;
+    page = p;
+    render();
+  }
+
+  function doSearch(btn){
+    btn.textContent = '查询中...';
+    btn.disabled = true;
+    setTimeout(function(){
+      btn.textContent = '搜索';
+      btn.disabled = false;
+      applyFilter();
+    }, 350);
+  }
+
+  /* 详情：线下补录单直接跳详情原型，线上申请单原型未覆盖 */
+  function openDetail(no){
+    var r = ROWS.filter(function(x){ return x.no === no; })[0];
+    if(r && r.src === '线下补录'){
+      window.open(DETAIL_URL, '_blank');
+    }else{
+      toast('线上申请单的详情原型暂未覆盖');
+    }
+  }
+
+  /* 作废 */
+  function askVoid(no){
+    var r = ROWS.filter(function(x){ return x.no === no; })[0];
+    voidTarget = r;
+    document.getElementById('voidDesc').innerHTML =
+      '作废后本单不再计为有效开票，本单关联的 <b>' + (r.orders || 0) + ' 个订单</b>' +
+      '开票状态将回写为「已作废」，并可重新在「新增开票」中被选择开票。';
+    document.getElementById('voidMask').classList.add('show');
+  }
+  function closeVoid(){ document.getElementById('voidMask').classList.remove('show'); }
+  function doVoid(){
+    if(voidTarget){
+      voidTarget.status = '已作废';
+      toast('已作废：' + voidTarget.no);
+    }
+    closeVoid();
+    render();
+  }
+
+  function toast(msg){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(t);
+    t = setTimeout(function(){ el.classList.remove('show'); }, 2400);
+  }
+
+  applyFilter();
+</script>
+</body>
+</html>
