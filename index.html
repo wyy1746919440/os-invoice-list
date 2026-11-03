@@ -100,6 +100,7 @@
   .src{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:11px;font-size:12px;}
   .src.offline{background:#fff3e0;color:#c46200;}
   .src.online{background:var(--primary-light);color:var(--primary);}
+  .src.cust{background:#e8f7ef;color:#00875a;}
   .st{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:11px;font-size:12px;}
   .st::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
   .st.s-done{background:#e8f7ef;color:#00875a;}
@@ -188,10 +189,11 @@
           <input class="sel" id="fMch" placeholder="输入商户名称" style="min-width:180px;">
         </div>
         <div class="fb-item">
-          <span class="fl">开票来源</span>
-          <select class="sel" id="fSrc">
+          <span class="fl">申请类型</span>
+          <select class="sel" id="fApplyType">
             <option value="">全部</option>
-            <option value="线上申请">线上申请</option>
+            <option value="客户开票">客户开票</option>
+            <option value="平台开票">平台开票</option>
             <option value="线下补录">线下补录</option>
           </select>
         </div>
@@ -227,7 +229,7 @@
               <th style="width:160px;">开票单号</th>
               <th style="min-width:220px;">商户</th>
               <th style="width:110px;">开票类型</th>
-              <th style="width:110px;">开票来源</th>
+              <th style="width:110px;">申请类型</th>
               <th class="num" style="width:120px;">开票金额</th>
               <th style="width:100px;">单据状态</th>
               <th style="width:110px;">开票日期</th>
@@ -261,19 +263,19 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  /* 演示数据：混合线上申请 / 线下补录 */
+  /* 演示数据：混合客户开票 / 平台开票 / 线下补录 */
   var ROWS = [
-    {no:'KP202611020001', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线下补录', amt:74896,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 16:20:33', orders:6},
-    {no:'KP202611020002', mch:'韦小宝',                     type:'快销品采购', src:'线下补录', amt:26218,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 15:02:11', orders:1},
-    {no:'KP202610310018', mch:'深圳市乐科智控科技有限公司', type:'售货机运营', src:'线上申请', amt:128400, status:'待审核', date:'2026-10-31', by:'李海涛', at:'2026-10-31 10:12:40', orders:0},
-    {no:'KP202610300012', mch:'广州云小铺商贸有限公司',     type:'快销品采购', src:'线上申请', amt:52300,  status:'审核中', date:'2026-10-30', by:'陈嘉怡', at:'2026-10-30 09:45:02', orders:0},
-    {no:'KP202610290006', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线下补录', amt:150000, status:'已作废', date:'2026-10-29', by:'王泳瑜', at:'2026-10-29 17:31:18', orders:3},
-    {no:'KP202610280021', mch:'东莞智联零售有限公司',       type:'售货机运营', src:'线上申请', amt:86000,  status:'已开票', date:'2026-10-28', by:'李海涛', at:'2026-10-28 11:08:55', orders:0},
-    {no:'KP202610270009', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线上申请', amt:210000, status:'待开票', date:'2026-10-27', by:'陈嘉怡', at:'2026-10-27 14:22:36', orders:0},
-    {no:'KP202610260014', mch:'韦小宝',                     type:'快销品采购', src:'线上申请', amt:9600,   status:'已开票', date:'2026-10-26', by:'李海涛', at:'2026-10-26 16:40:12', orders:0},
-    {no:'KP202610250003', mch:'广州云小铺商贸有限公司',     type:'快销品采购', src:'线下补录', amt:68800,  status:'已开票', date:'2026-10-25', by:'王泳瑜', at:'2026-10-25 10:05:47', orders:2},
-    {no:'KP202610240017', mch:'东莞智联零售有限公司',       type:'售货机运营', src:'线上申请', amt:132000, status:'待审核', date:'2026-10-24', by:'陈嘉怡', at:'2026-10-24 15:58:30', orders:0},
-    {no:'KP202610230008', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', src:'线上申请', amt:45000,  status:'已开票', date:'2026-10-23', by:'李海涛', at:'2026-10-23 09:21:09', orders:0}
+    {no:'KP202611020001', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'线下补录', amt:74896,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 16:20:33', orders:6},
+    {no:'KP202611020002', mch:'韦小宝',                     type:'快销品采购', atype:'线下补录', amt:26218,  status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 15:02:11', orders:1},
+    {no:'KP202610310018', mch:'深圳市乐科智控科技有限公司', type:'售货机运营', atype:'平台开票', amt:128400, status:'待审核', date:'2026-10-31', by:'李海涛', at:'2026-10-31 10:12:40', orders:0},
+    {no:'KP202610300012', mch:'广州云小铺商贸有限公司',     type:'快销品采购', atype:'客户开票', amt:52300,  status:'审核中', date:'2026-10-30', by:'陈嘉怡', at:'2026-10-30 09:45:02', orders:0},
+    {no:'KP202610290006', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'线下补录', amt:150000, status:'已作废', date:'2026-10-29', by:'王泳瑜', at:'2026-10-29 17:31:18', orders:3},
+    {no:'KP202610280021', mch:'东莞智联零售有限公司',       type:'售货机运营', atype:'平台开票', amt:86000,  status:'已开票', date:'2026-10-28', by:'李海涛', at:'2026-10-28 11:08:55', orders:0},
+    {no:'KP202610270009', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'客户开票', amt:210000, status:'待开票', date:'2026-10-27', by:'陈嘉怡', at:'2026-10-27 14:22:36', orders:0},
+    {no:'KP202610260014', mch:'韦小宝',                     type:'快销品采购', atype:'客户开票', amt:9600,   status:'已开票', date:'2026-10-26', by:'李海涛', at:'2026-10-26 16:40:12', orders:0},
+    {no:'KP202610250003', mch:'广州云小铺商贸有限公司',     type:'快销品采购', atype:'线下补录', amt:68800,  status:'已开票', date:'2026-10-25', by:'王泳瑜', at:'2026-10-25 10:05:47', orders:2},
+    {no:'KP202610240017', mch:'东莞智联零售有限公司',       type:'售货机运营', atype:'平台开票', amt:132000, status:'待审核', date:'2026-10-24', by:'陈嘉怡', at:'2026-10-24 15:58:30', orders:0},
+    {no:'KP202610230008', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'平台开票', amt:45000,  status:'已开票', date:'2026-10-23', by:'李海涛', at:'2026-10-23 09:21:09', orders:0}
   ];
   var DETAIL_URL = 'https://wyy1746919440.github.io/os-invoice-offline-detail/';
   var OFFLINE_URL = 'https://wyy1746919440.github.io/os-invoice-offline/';
@@ -294,7 +296,7 @@
   function applyFilter(){
     var no = document.getElementById('fNo').value.trim().toLowerCase();
     var mch = document.getElementById('fMch').value.trim();
-    var src = document.getElementById('fSrc').value;
+    var atype = document.getElementById('fApplyType').value;
     var st = document.getElementById('fStatus').value;
     var from = document.getElementById('fFrom').value;
     var to = document.getElementById('fTo').value;
@@ -302,7 +304,7 @@
     view = ROWS.filter(function(r){
       if(no && r.no.toLowerCase().indexOf(no) < 0) return false;
       if(mch && r.mch.indexOf(mch) < 0) return false;
-      if(src && r.src !== src) return false;
+      if(atype && r.atype !== atype) return false;
       if(st && r.status !== st) return false;
       if(from && r.date < from) return false;
       if(to && r.date > to) return false;
@@ -314,7 +316,7 @@
 
   function resetFilter(){
     ['fNo','fMch','fFrom','fTo'].forEach(function(id){ document.getElementById(id).value = ''; });
-    document.getElementById('fSrc').value = '';
+    document.getElementById('fApplyType').value = '';
     document.getElementById('fStatus').value = '';
     applyFilter();
   }
@@ -325,12 +327,13 @@
     var list = view.slice(start, start + SIZE);
 
     tb.innerHTML = list.map(function(r){
-      var canVoid = r.src === '线下补录' && r.status !== '已作废';
+      var canVoid = r.atype === '线下补录' && r.status !== '已作废';
+      var cls = r.atype === '线下补录' ? 'offline' : (r.atype === '客户开票' ? 'cust' : 'online');
       return '<tr>'+
         '<td><span class="mono">'+r.no+'</span></td>'+
         '<td class="strong">'+r.mch+'</td>'+
         '<td>'+r.type+'</td>'+
-        '<td><span class="src '+(r.src==='线下补录'?'offline':'online')+'">'+r.src+'</span></td>'+
+        '<td><span class="src '+cls+'">'+r.atype+'</span></td>'+
         '<td class="num strong">'+fmt(r.amt)+'</td>'+
         '<td><span class="st '+stClass(r.status)+'">'+r.status+'</span></td>'+
         '<td>'+r.date+'</td>'+
@@ -375,13 +378,13 @@
     }, 350);
   }
 
-  /* 详情：线下补录单直接跳详情原型，线上申请单原型未覆盖 */
+  /* 详情：线下补录单直接跳详情原型，客户开票 / 平台开票单原型未覆盖 */
   function openDetail(no){
     var r = ROWS.filter(function(x){ return x.no === no; })[0];
-    if(r && r.src === '线下补录'){
+    if(r && r.atype === '线下补录'){
       window.open(DETAIL_URL, '_blank');
     }else{
-      toast('线上申请单的详情原型暂未覆盖');
+      toast('客户开票 / 平台开票单的详情原型暂未覆盖');
     }
   }
 
