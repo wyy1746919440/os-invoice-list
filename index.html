@@ -107,7 +107,7 @@
   .st.s-wait{background:#fff7e8;color:#b0781a;}
   .st.s-ing{background:var(--primary-light);color:var(--primary);}
   .st.s-void{background:#f2f3f5;color:#8a919f;}
-  .st.s-part{background:#fff3e0;color:#c46200;}
+  .st.s-part{background:#fff3e0;color:#c46200;} /* 保留样式：部分开票仅用于订单维度，本列表不再出现 */
 
   .op{display:flex;gap:12px;align-items:center;}
   .link{color:var(--primary);cursor:pointer;font-size:13px;}
@@ -205,7 +205,6 @@
             <option value="待开票">待开票</option>
             <option value="待审核">待审核</option>
             <option value="审核中">审核中</option>
-            <option value="部分开票">部分开票</option>
             <option value="已开票">已开票</option>
             <option value="已作废">已作废</option>
           </select>
@@ -267,7 +266,7 @@
 <script>
   /* 演示数据：混合客户开票 / 平台开票 / 线下补录 */
   var ROWS = [
-    {no:'KP202611020001', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'线下补录', amt:2502000, status:'部分开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 16:20:33', orders:1},
+    {no:'KP202611020001', mch:'深圳市乐科智控科技有限公司', type:'快销品采购', atype:'线下补录', amt:2502000, status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 16:20:33', orders:1},
     {no:'KP202611020002', mch:'韦小宝',                     type:'快销品采购', atype:'线下补录', amt:3446600, status:'已开票', date:'2026-10-28', by:'王泳瑜', at:'2026-10-28 15:02:11', orders:1},
     {no:'KP202610310018', mch:'深圳市乐科智控科技有限公司', type:'售货机运营', atype:'平台开票', amt:128400, status:'待审核', date:'2026-10-31', by:'李海涛', at:'2026-10-31 10:12:40', orders:0},
     {no:'KP202610300012', mch:'广州云小铺商贸有限公司',     type:'快销品采购', atype:'客户开票', amt:52300,  status:'审核中', date:'2026-10-30', by:'陈嘉怡', at:'2026-10-30 09:45:02', orders:0},
@@ -290,7 +289,6 @@
   function fmt(f){ return '¥' + (f/100).toFixed(2); }
   function stClass(s){
     if(s === '已开票') return 's-done';
-    if(s === '部分开票') return 's-part';
     if(s === '待开票' || s === '待审核') return 's-wait';
     if(s === '审核中') return 's-ing';
     return 's-void';
